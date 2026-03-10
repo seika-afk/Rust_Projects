@@ -9,6 +9,12 @@ async fn main()->Result<()>{
         .text()
         .await?;
 
+
+
+    println!("---------------------------------");
+
+    println!("{}",res);
+    println!("---------------------------------");
     Document::from(res.as_str())
             .find(Name("a"))
             .filter_map(|n| n.attr("href"))

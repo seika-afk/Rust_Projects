@@ -1,3 +1,6 @@
+use std::fmt::format;
+use std::i64;
+
 use actix_web::error::ErrorInternalServerError;
 use actix_web::{
     HttpServer,
@@ -41,6 +44,22 @@ async fn add(path:Path<(i64,i64)>)-> Result<impl Responder,actix_web::Error>{
 }
 
 
+#[get("/divide/{num1}/{num2}")]
+async fn divide(path:Path<(i64,i64)>)-> Result<impl  Responder,actix_web::Error>{
+
+    let (num1,num2)=path.into_inner();
+    let mut engine= Engine::new();
+
+
+    engine.register_fn("num1",move || num1);
+    engine.register_fn("num2",move || num2);
+
+
+    let result= engine.eval_file::<i64>("src/divide.rhai".into()).map_err(ErrorInternalServerError)?;
+    Ok(format!("{result}"))
+}
+
+
 
 #[actix_web::main]
 async fn main()->std::io::Result<()>{
@@ -49,6 +68,7 @@ async fn main()->std::io::Result<()>{
         App::new()
             .service(multiply)
             .service(add)
+            .service(divide)
     })
     .bind(("127.0.0.1",8080))?.run().await
 
